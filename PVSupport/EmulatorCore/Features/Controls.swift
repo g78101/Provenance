@@ -114,6 +114,7 @@ import Foundation
     case right
     case a
     case b
+    case j
     case start
     case select
     case count

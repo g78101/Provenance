@@ -475,7 +475,7 @@ final class PVEmulatorViewController: PVEmulatorViewControllerRootClass, PVAudio
             let height: CGFloat = 42
             let width: CGFloat = 42
             menuButton.imageView?.contentMode = .center
-            let frame = CGRect(x: safeAreaInsets.left + 10, y: safeAreaInsets.top + 5, width: width, height: height)
+            let frame = CGRect(x: safeAreaInsets.left + 10, y: view.frame.size.height - 5 - height, width: width, height: height)
             menuButton.frame = frame
         }
     }
@@ -491,8 +491,12 @@ final class PVEmulatorViewController: PVEmulatorViewControllerRootClass, PVAudio
     }
 
     #if os(iOS)
-    override var prefersStatusBarHidden: Bool {
-        return true
+//    override var prefersStatusBarHidden: Bool {
+//        return true
+//    }
+    
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
 
     override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {

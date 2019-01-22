@@ -29,6 +29,8 @@ final class PVNESControllerViewController: PVControllerViewController<PVNESSyste
                 button.buttonTag = .a
             } else if title == "B" {
                 button.buttonTag = .b
+            } else if title == "J" {
+                button.buttonTag = .j
             }
         }
 
@@ -77,12 +79,24 @@ final class PVNESControllerViewController: PVControllerViewController<PVNESSyste
     }
 
     override func buttonPressed(_ button: JSButton) {
-        emulatorCore.didPush(button.buttonTag, forPlayer: 0)
+        if button.buttonTag != .j {
+            emulatorCore.didPush(button.buttonTag, forPlayer: 0)
+        }
+        else {
+            emulatorCore.didPush(.a, forPlayer: 0)
+            emulatorCore.didPush(.b, forPlayer: 0)
+        }
         super.buttonPressed(button)
     }
 
     override func buttonReleased(_ button: JSButton) {
-        emulatorCore.didRelease(button.buttonTag, forPlayer: 0)
+        if button.buttonTag != .j {
+            emulatorCore.didRelease(button.buttonTag, forPlayer: 0)
+        }
+        else {
+            emulatorCore.didRelease(.a, forPlayer: 0)
+            emulatorCore.didRelease(.b, forPlayer: 0)
+        }
         super.buttonReleased(button)
     }
 
