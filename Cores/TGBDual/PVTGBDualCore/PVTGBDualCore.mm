@@ -15,8 +15,7 @@
 #include "libretro.h"
 
 @interface PVTGBDualCore () {
-    NSString *romName;
-    NSTimeInterval frameInterval;
+    bool emulationHasRun;
 }
 
 @end
@@ -29,14 +28,7 @@ static __weak PVTGBDualCore *_current;
 #pragma mark - PVTGBDualCore Begin
 - (id)init {
     if (self = [super init]) {
-        if (_videoBuffer)
-            free(_videoBuffer);
-
-        _videoWidth = 160;
-        _videoHeight = 144;
-        _videoBuffer = (uint16_t*)malloc(_videoWidth * _videoHeight * 2 * 2);
-        
-        _sampleRate = 44100;
+        emulationHasRun = false;
     }
     
     _current = self;
@@ -54,7 +46,7 @@ static __weak PVTGBDualCore *_current;
     
     const void *data;
     size_t size;
-    romName = [[[path lastPathComponent] componentsSeparatedByString:@"."] objectAtIndex:0];
+    self.romName = [[[path lastPathComponent] componentsSeparatedByString:@"."] objectAtIndex:0];
     
     //load cart, read bytes, get length
     NSData* dataObj = [NSData dataWithContentsOfFile:[path stringByStandardizingPath]];
@@ -64,13 +56,13 @@ static __weak PVTGBDualCore *_current;
     const char *meta = NULL;
     
     retro_set_environment(environment_callback);
-    retro_init();
-    
-    retro_set_audio_sample(audio_callback);
-    retro_set_audio_sample_batch(audio_batch_callback);
     retro_set_video_refresh(video_callback);
     retro_set_input_poll(input_poll_callback);
     retro_set_input_state(input_state_callback);
+    retro_set_audio_sample(audio_callback);
+    retro_set_audio_sample_batch(audio_batch_callback);
+    
+    retro_init();
     
     const char *fullPath = [path UTF8String];
     
@@ -92,7 +84,15 @@ static __weak PVTGBDualCore *_current;
         struct retro_system_av_info info;
         retro_get_system_av_info(&info);
         
-        frameInterval = info.timing.fps;
+        if (_videoBuffer) {
+            free(_videoBuffer);
+        }
+        
+        _videoWidth = info.geometry.max_width;
+        _videoHeight = info.geometry.max_height;
+        _videoBuffer = (uint16_t*)malloc(_videoWidth * _videoHeight * 2 * 2);
+        
+        _frameInterval = info.timing.fps;
         _sampleRate = info.timing.sample_rate;
         
         retro_get_region();
@@ -104,8 +104,8 @@ static __weak PVTGBDualCore *_current;
     if (error) {
         NSDictionary *userInfo = @{
                                    NSLocalizedDescriptionKey: @"Failed to load game.",
-                                   NSLocalizedFailureReasonErrorKey: @"PicoDrive failed to load ROM.",
-                                   NSLocalizedRecoverySuggestionErrorKey: @"Check that file isn't corrupt and in format PicoDrive supports."
+                                   NSLocalizedFailureReasonErrorKey: @"TGBDual failed to load ROM.",
+                                   NSLocalizedRecoverySuggestionErrorKey: @"Check that file isn't corrupt and in format TGBDual supports."
                                    };
         
         NSError *newError = [NSError errorWithDomain:PVEmulatorCoreErrorDomain
@@ -120,15 +120,13 @@ static __weak PVTGBDualCore *_current;
 
  - (void)startEmulation {
      if(self.isRunning == false) {
-       [super startEmulation];
+         emulationHasRun = true;
+         [super startEmulation];
      }
 }
 
 - (void)stopEmulation {
-    // TODO: When opening menu, emulation is paused (PVEmulatorCore::setPauseEmulation)
-    // which sets isRunning to false. If user selects >Quit< the emulation is not stopped.
-    // Any ideas how to handle/improve this?
-    if (self.isRunning) {
+    if (emulationHasRun) {
         if([self.batterySavesPath length]) {
             [[NSFileManager defaultManager] createDirectoryAtPath:self.batterySavesPath withIntermediateDirectories:YES attributes:nil error:NULL];
             NSString *filePath = [self.batterySavesPath stringByAppendingPathComponent:[self.romName stringByAppendingPathExtension:@"sav"]];
@@ -143,6 +141,8 @@ static __weak PVTGBDualCore *_current;
                 retro_unload_game();
                 retro_deinit();
         });
+        
+        emulationHasRun = false;
     }
 }
 
@@ -227,7 +227,6 @@ static bool environment_callback(unsigned cmd, void *data) {
                 default:
                     return false;
             }
-            //currentPixFmt = pix_fmt;
             break;
         }
         case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY :
@@ -271,8 +270,7 @@ static bool environment_callback(unsigned cmd, void *data) {
                 NSLog(@"Setting key: %s to val: %s", req->key, req->value);
                 return true;
             }
-            
-            req->value = nullptr;
+
             NSLog(@"Unhandled variable: %s", req->key);
             return true;
         }

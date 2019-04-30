@@ -9,7 +9,6 @@
 import Foundation
 
 public struct AppearanceStyle {
-
     public let name: String
 
     public init(_ name: String) {
@@ -18,9 +17,8 @@ public struct AppearanceStyle {
 }
 
 extension AppearanceStyle: ExpressibleByNilLiteral {
-
-    public init(nilLiteral: ()) {
-        self.name = ""
+    public init(nilLiteral _: ()) {
+        name = ""
     }
 }
 
@@ -31,8 +29,7 @@ extension AppearanceStyle: Equatable {
 }
 
 extension AppearanceStyle: Hashable {
-
-    public var hashValue: Int {
-        return name.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
     }
 }

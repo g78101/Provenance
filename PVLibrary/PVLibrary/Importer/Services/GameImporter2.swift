@@ -7,8 +7,8 @@
 //
 
 import Foundation
+//import Promises
 import RxSwift
-import Promises
 
 public enum ImporterFileType {
     case rom
@@ -24,7 +24,7 @@ public enum ImporterArchiveType {
     case sevenZip
     case rar
 
-    var supportsCRCs : Bool { return true }
+    var supportsCRCs: Bool { return true }
 }
 
 enum MatchHashType {
@@ -41,37 +41,37 @@ enum MatchType {
 }
 
 extension URL {
-    var isFileArchive : Bool {
+    var isFileArchive: Bool {
         guard isFileURL else { return false }
         let ext = pathExtension.lowercased()
         return PVEmulatorConfiguration.archiveExtensions.contains(ext)
     }
 }
 
-struct ImportCandiate2 {
-    let url : URL
-
-    var isFileArchive : Promise<Bool> { return Promise{ self.url.isFileArchive } }
-}
-
-final public class ImporterService {
-    public static let shared : ImporterService = ImporterService()
-
-    private let dispaseBag = DisposeBag()
-    private init() {
-        DirectoryWatcher2.shared.newFile
-            .do(onNext: handleNewFile(_:))
-            .subscribe()
-            .disposed(by: dispaseBag)
-    }
+//struct ImportCandiate2 {
+//    let url: URL
+//
+//    var isFileArchive: Promise<Bool> { return Promise { self.url.isFileArchive } }
+//}
 
 
-    private func handleNewFile(_ url : URL) throws {
-        let importCandidate = ImportCandiate2(url: url)
+//public final class ImporterService {
+//    public static let shared: ImporterService = ImporterService()
+//
+//    private let dispaseBag = DisposeBag()
+//    private init() {
+//        DirectoryWatcher2.shared.newFile
+//            .do(onNext: handleNewFile(_:))
+//            .subscribe()
+//            .disposed(by: dispaseBag)
+//    }
+//
+//    private func handleNewFile(_ url: URL) throws {
+//        let importCandidate = ImportCandiate2(url: url)
 //
 //        importCandidate.isFileArchive.then {
 //            if $0 {
-//                
+//
 //            }
 //        }
 //
@@ -82,7 +82,7 @@ final public class ImporterService {
 //                GameImporter
 //            }
 //        }
-    }
+//    }
 
     /*
      Flow:
@@ -91,19 +91,18 @@ final public class ImporterService {
      1. Detect file
 
      1. Is file archive
-        a. contains sub zips?
-        a. Move to processing folder
-        b. Does arvhcie support CRCs
-            i. Does CRC match
+     a. contains sub zips?
+     a. Move to processing folder
+     b. Does arvhcie support CRCs
+     i. Does CRC match
 
      2. Is file single
-        a. Is preseleted system
-            match(filtered):
-            i. match by MD5 / SHA1
-            ii. match by extension
-                z. single match, move system
-                y. multi-match, move to conflicts
-
+     a. Is preseleted system
+     match(filtered):
+     i. match by MD5 / SHA1
+     ii. match by extension
+     z. single match, move system
+     y. multi-match, move to conflicts
 
      */
-}
+//}b
