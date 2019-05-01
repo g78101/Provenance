@@ -468,7 +468,7 @@ final class PVEmulatorViewController: PVEmulatorViewControllerRootClass, PVAudio
         #endif
     }
 
-#if os(iOS)
+    #if os(iOS)
     func layoutMenuButton() {
         if let menuButton = self.menuButton {
             let height: CGFloat = 42
@@ -477,6 +477,7 @@ final class PVEmulatorViewController: PVEmulatorViewControllerRootClass, PVAudio
             let frame = CGRect(x: safeAreaInsets.left + 10, y: view.frame.size.height - 5 - height, width: width, height: height)
             menuButton.frame = frame
         }
+    }
     #endif
     func documentsPath() -> String? {
         #if os(tvOS)
